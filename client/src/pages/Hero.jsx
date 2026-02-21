@@ -231,6 +231,15 @@ const Hero = () => {
           >
             <AnimatedButton onClick={() => {}} text={"History"} px={6} py={2} />
           </div>
+
+          <div
+            onClick={() => {
+              navigate("/roadmap");
+            }}
+            className=""
+          >
+            <AnimatedButton onClick={() => {}} text={"Roadmap"} px={6} py={2} />
+          </div>
           <div ref={profileRef} className="relative">
             <div
               onClick={() => setShowProfile((prev) => !prev)}
@@ -381,7 +390,11 @@ const Hero = () => {
       <div
         className={`absolute w-[30%] h-full ${showHistory ? "translate-x-0" : "translate-x-full"} top-0 right-0 transition-transform duration-500 ease-in-out z-30`}
       >
-        <HistoryModel showHistory={showHistory} chats={chats} onClose={() => setShowHistory(false)} />
+        <HistoryModel
+          showHistory={showHistory}
+          chats={chats}
+          onClose={() => setShowHistory(false)}
+        />
       </div>
     </div>
   );

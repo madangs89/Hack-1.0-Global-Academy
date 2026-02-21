@@ -16,6 +16,10 @@ import { fileURLToPath } from "url";
 import authRouter from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
 import { connectRedis, pubClient } from "./config/redis.connect.js";
+import { ai } from "./config/google.config.js";
+import { roadMapSystemInstruction } from "./llm/alllSystemInstruction.js";
+import { extractJSON } from "./controllers/chats.controler.js";
+import roadMapRouter from "./routes/roadmap.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,6 +55,7 @@ app.get("/", (req, res) => {
 
 app.use("/api", chatRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/llm", roadMapRouter);
 
 app.post("/render", async (req, res) => {
   const { code } = req.body;

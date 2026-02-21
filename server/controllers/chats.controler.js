@@ -5,7 +5,7 @@ import {
 } from "../llm/alllSystemInstruction.js";
 import Chat from "../models/chats.model.js";
 
-function extractJSON(text) {
+export function extractJSON(text) {
   try {
     return JSON.parse(text);
   } catch {
@@ -42,7 +42,7 @@ export const acceptChat = async (req, res) => {
 
     let chatDoc;
 
-    // 🔥 CASE 1: Create New Chat
+
     if (!chatId) {
       chatDoc = await Chat.create({
         userId,
@@ -57,7 +57,7 @@ export const acceptChat = async (req, res) => {
 
       chatId = chatDoc._id;
     } else {
-      // 🔥 CASE 2: Existing Chat
+ 
       chatDoc = await Chat.findOne({ _id: chatId, userId });
 
       if (!chatDoc) {
@@ -67,7 +67,6 @@ export const acceptChat = async (req, res) => {
         });
       }
 
-      // ✅ Only push NEW user message
       chatDoc.messages.push({
         from: "user",
         message: chat,
@@ -76,10 +75,8 @@ export const acceptChat = async (req, res) => {
       await chatDoc.save();
     }
 
-    // 🧠 Now DB is source of truth
     const fullHistory = chatDoc.messages;
 
-    // 🔥 Call AI
     const chatOptimizer = await ai.models.generateContent({
       model: "gemini-2.5-flash-lite",
       contents: JSON.stringify({
@@ -101,7 +98,6 @@ export const acceptChat = async (req, res) => {
 
     const { normalChatRes, isVideoCall, optimizedPrompt, key } = cleaned;
 
-    // 🔥 Save AI response
     chatDoc.messages.push({
       from: "system",
       message: normalChatRes,

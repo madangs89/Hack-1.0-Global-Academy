@@ -5,6 +5,7 @@ import Hero from "./pages/Hero";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setAuth, setUser } from "./redux/Slice/authSlice";
+import Roadmap from "./pages/Roadmap";
 
 const App = () => {
   const authSlice = useSelector((state) => state.auth);
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/home" element={<Hero />} />
         <Route path="/home/:id" element={<Hero />} />
+        <Route path="/roadmap" element={<Roadmap />} />
       </Routes>
     </div>
   );

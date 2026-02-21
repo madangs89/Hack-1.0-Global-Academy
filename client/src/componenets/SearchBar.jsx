@@ -44,18 +44,27 @@ function SearchBar({
           withCredentials: true,
         },
       );
-
     } catch (error) {
       console.log(error);
-      setChats((prevChats) => [
-        ...prevChats,
-        {
-          from: "system",
-          message: "Something went wrong",
+      setChats((prev) =>
+        prev.map((d) => ({
+          from: d.from,
+          message: d.message,
           code: null,
-          videoUrl: null,
-        },
-      ]);
+          videoUrl: d.videoUrl || null,
+        })),
+      );
+      setChats((prev) => {
+        return [
+          ...prev,
+          {
+            from: "system",
+            message: "Something went wrong. Please try again.",
+            code: null,
+            videoUrl: null,
+          },
+        ];
+      });
     } finally {
       setAiLoading(false);
     }

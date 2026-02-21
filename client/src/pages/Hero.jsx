@@ -169,35 +169,44 @@ const Hero = () => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("llmUpdates", ({ chatId, message, isVideoCall, videoUrl }) => {
+
+    const handleUpdate = (data) => {
+      console.log("Received llmUpdates:", data);
+
       setChats((prev) => [
         ...prev,
         {
           from: "system",
-          message,
+          message: data.message,
           code: null,
-          isVideoCall,
-          videoUrl,
+          isVideoCall: data.isVideoCall,
+          videoUrl: data.videoUrl,
         },
       ]);
-    });
+    };
+
+    socket.on("llmUpdates", handleUpdate);
+
+    return () => {
+      socket.off("llmUpdates", handleUpdate);
+    };
   }, [socket]);
 
-   useEffect(() => {
-      if (!socketSlice.socket) {
-        const socket = io(import.meta.env.VITE_BACKEND_URL, {
-          transports: ["websocket"],
-          withCredentials: true,
-          auth: {
-            id: authSlice.user?._id,
-          },
-        });
-        socket.on("connect", () => {
-          dispatch(setSocket(socket));
-        });
-      }
-    }, [authSlice.isAuth, socketSlice.socket, authSlice.user?._id, dispatch]);
-  
+  useEffect(() => {
+    if (!socketSlice.socket) {
+      const socket = io(import.meta.env.VITE_BACKEND_URL, {
+        transports: ["websocket"],
+        withCredentials: true,
+        auth: {
+          id: authSlice.user?._id,
+        },
+      });
+      socket.on("connect", () => {
+        console.log("Connected to server");
+        dispatch(setSocket(socket));
+      });
+    }
+  }, [authSlice.isAuth, socketSlice.socket, authSlice.user?._id, dispatch]);
 
   const handleLogout = async () => {
     try {

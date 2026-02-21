@@ -102,15 +102,11 @@ export const acceptChat = async (req, res) => {
 
     const { normalChatRes, isVideoCall, optimizedPrompt, key } = cleaned;
 
-    const socketId = await pubClient.hget(
-      "socketIdToUserId",
-      userId.toString(),
-    );
-    io.to(socketId).emit("llmUpdates", {
+    io.to(userId.toString()).emit("llmUpdates", {
       chatId,
       message: normalChatRes,
       isVideoCall,
-      videoUrl: null, // Will be updated later if it's a video call
+      videoUrl: null,
     });
 
     chatDoc.messages.push({

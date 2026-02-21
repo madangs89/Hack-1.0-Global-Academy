@@ -96,17 +96,22 @@ app.post("/render", async (req, res) => {
 
 io.on("connection", (socket) => {
   const userId = socket.handshake.auth.id;
-  if (userId) {
-    console.log(userId, socket.id);
+  // if (userId) {
+  //   console.log(userId, socket.id);
 
-    pubClient.hset("socketIdToUserId", userId, socket.id);
+  //   pubClient.hset("socketIdToUserId", userId, socket.id);
+  // }
+
+  if (userId) {
+    socket.join(userId);
+    console.log("User joined room:", userId);
   }
 
-  socket.on("disconnect", async () => {
-    if (userId) {
-      await pubClient.hdel("socketIdToUserId", userId);
-    }
-  });
+  // socket.on("disconnect", async () => {
+  //   if (userId) {
+  //     await pubClient.hdel("socketIdToUserId", userId);
+  //   }
+  // });
 });
 
 server.listen(port, async () => {

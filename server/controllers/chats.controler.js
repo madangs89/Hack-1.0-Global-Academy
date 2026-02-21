@@ -1,9 +1,15 @@
+import { uploadVideoBuffer } from "../config/cloudinary.config.js";
 import { ai } from "../config/google.config.js";
+import { pubClient } from "../config/redis.connect.js";
+import { io } from "../index.js";
 import {
   animationGeneratorSystem,
   orionVisualEngineSystem,
 } from "../llm/alllSystemInstruction.js";
 import Chat from "../models/chats.model.js";
+
+import axios from "axios";
+import fs from "fs";
 
 export function extractJSON(text) {
   try {
@@ -42,7 +48,6 @@ export const acceptChat = async (req, res) => {
 
     let chatDoc;
 
-
     if (!chatId) {
       chatDoc = await Chat.create({
         userId,
@@ -57,7 +62,6 @@ export const acceptChat = async (req, res) => {
 
       chatId = chatDoc._id;
     } else {
- 
       chatDoc = await Chat.findOne({ _id: chatId, userId });
 
       if (!chatDoc) {
@@ -66,7 +70,6 @@ export const acceptChat = async (req, res) => {
           success: false,
         });
       }
-
       chatDoc.messages.push({
         from: "user",
         message: chat,
@@ -95,8 +98,20 @@ export const acceptChat = async (req, res) => {
       .trim();
 
     cleaned = extractJSON(cleaned);
+    console.log("cleaned optimizer response", cleaned);
 
     const { normalChatRes, isVideoCall, optimizedPrompt, key } = cleaned;
+
+    const socketId = await pubClient.hget(
+      "socketIdToUserId",
+      userId.toString(),
+    );
+    io.to(socketId).emit("llmUpdates", {
+      chatId,
+      message: normalChatRes,
+      isVideoCall,
+      videoUrl: null, // Will be updated later if it's a video call
+    });
 
     chatDoc.messages.push({
       from: "system",
@@ -104,6 +119,40 @@ export const acceptChat = async (req, res) => {
     });
 
     await chatDoc.save();
+    let videoUrl = null;
+
+    if (isVideoCall) {
+      const isCachedDataAwailable = await pubClient.get(key);
+
+      if (isCachedDataAwailable) {
+        console.log("Cache hit for key:", key);
+        videoUrl = await pubClient.hget("videoKeyToUrl", key);
+        console.log("Video URL from cache:", videoUrl);
+        chatDoc.messages[chatDoc.messages.length - 1].videoUrl = videoUrl;
+        await chatDoc.save();
+      } else {
+        const vedioRes = await axios.get(
+          `http://172.16.14.149:8000/generate-video`,
+          {
+            params: {
+              query: optimizedPrompt,
+              history: JSON.stringify(chatDoc.messages),
+            },
+            responseType: "arraybuffer", // 🔥 VERY IMPORTANT
+          },
+        );
+        console.log(vedioRes.headers["X-Narration"]);
+
+        console.log(vedioRes);
+        const uploadRes = await uploadVideoBuffer(vedioRes.data);
+        videoUrl = uploadRes.secure_url;
+
+        console.log("Video uploaded to Cloudinary:", videoUrl);
+        await pubClient.hset("videoKeyToUrl", key, videoUrl);
+        chatDoc.messages[chatDoc.messages.length - 1].videoUrl = videoUrl;
+        await chatDoc.save();
+      }
+    }
 
     return res.status(200).json({
       message: "Chat processed successfully",
@@ -112,6 +161,7 @@ export const acceptChat = async (req, res) => {
       optimizedPrompt,
       key,
       chatId,
+      videoUrl,
     });
   } catch (error) {
     console.log(error);

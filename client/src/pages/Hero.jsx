@@ -12,6 +12,8 @@ import toast from "react-hot-toast";
 import BlackLoader from "../componenets/BlackLoader";
 import WhiteLoader from "../componenets/WhiteLoader";
 import { setCurrentWorkingId, setUser } from "../redux/Slice/authSlice";
+import { io } from "socket.io-client";
+import { setSocket } from "../redux/Slice/socketSlice";
 
 const Hero = () => {
   const imageRef = useRef(null);
@@ -33,10 +35,13 @@ const Hero = () => {
   const [showProfile, setShowProfile] = useState(false);
   const authSlice = useSelector((state) => state.auth);
 
+  const socket = useSelector((state) => state.socket.socket);
+
   const [chats, setChats] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const profileRef = useRef(null);
+  const socketSlice = useSelector((state) => state.socket);
 
   useEffect(() => {
     if (!authSlice.isAuth && location.pathname === "/home") {
@@ -161,6 +166,38 @@ const Hero = () => {
         ease: "power3.out",
       });
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("llmUpdates", ({ chatId, message, isVideoCall, videoUrl }) => {
+      setChats((prev) => [
+        ...prev,
+        {
+          from: "system",
+          message,
+          code: null,
+          isVideoCall,
+          videoUrl,
+        },
+      ]);
+    });
+  }, [socket]);
+
+   useEffect(() => {
+      if (!socketSlice.socket) {
+        const socket = io(import.meta.env.VITE_BACKEND_URL, {
+          transports: ["websocket"],
+          withCredentials: true,
+          auth: {
+            id: authSlice.user?._id,
+          },
+        });
+        socket.on("connect", () => {
+          dispatch(setSocket(socket));
+        });
+      }
+    }, [authSlice.isAuth, socketSlice.socket, authSlice.user?._id, dispatch]);
+  
 
   const handleLogout = async () => {
     try {
@@ -297,33 +334,44 @@ const Hero = () => {
             ref={chatsRef}
             className="flex-1 overflow-y-auto max-w-4xl w-full mx-auto mt-10 space-y-6"
           >
-            {chats.map((chat, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  chat.from === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {chats.map((chat, index) => {
+              const isVedioCallTrue = chat?.isVideoCall || false;
+              return (
                 <div
-                  className={`max-w-lg px-6 py-4 rounded-2xl backdrop-blur-xl border ${
-                    chat.from === "user"
-                      ? "bg-white text-black border-white/40"
-                      : "bg-white/10 text-white border-white/20"
+                  key={index}
+                  className={`flex ${
+                    chat.from === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed">{chat.message}</p>
+                  <div
+                    className={`max-w-lg px-6 py-4 rounded-2xl backdrop-blur-xl border ${
+                      chat.from === "user"
+                        ? "bg-white text-black border-white/40"
+                        : "bg-white/10 text-white border-white/20"
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">{chat.message}</p>
 
-                  {/* Optional Media */}
-                  {chat.vedioUrl && (
-                    <img
-                      src={chat.vedioUrl}
-                      alt=""
-                      className="mt-3 rounded-xl w-full object-cover"
-                    />
-                  )}
+                    {/* Optional Media */}
+                    {chat.videoUrl && (
+                      <video
+                        controls
+                        src={chat.videoUrl}
+                        alt=""
+                        className="mt-3 rounded-xl w-full object-cover"
+                      />
+                    )}
+                    {isVedioCallTrue &&
+                      !chat.videoUrl &&
+                      chat.from != "user" && (
+                        <div className="flex justify-center items-center w-56 max-auto bg-white h-80 rounded-md mt-4">
+                          <div className="glow-orb"></div>
+                        </div>
+                      )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Bottom Search Bar */}

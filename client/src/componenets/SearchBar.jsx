@@ -5,6 +5,7 @@ import BlackLoader from "./BlackLoader";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentWorkingId } from "../redux/Slice/authSlice";
+import { useNavigate } from "react-router-dom";
 
 function SearchBar({
   className = "",
@@ -15,8 +16,8 @@ function SearchBar({
   query,
   setQuery,
 }) {
-
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
@@ -44,19 +45,6 @@ function SearchBar({
         },
       );
 
-      if (aiRes.data.success) {
-        setChats((prevChats) => [
-          ...prevChats,
-          {
-            from: "system",
-            message: aiRes.data.normalChatRes,
-            code: null,
-            videoUrl: null,
-          },
-        ]);
-
-        dispatch(setCurrentWorkingId(aiRes.data.chatId));
-      }
     } catch (error) {
       console.log(error);
       setChats((prevChats) => [

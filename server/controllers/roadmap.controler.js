@@ -91,3 +91,70 @@ export const createRoadmap = async (req, res) => {
     });
   }
 };
+
+export const getRoadmaps = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+        message: "User ID not found in request",
+      });
+    }
+
+    const roadmaps = await Roadmap.find({ userId });
+
+    if (!roadmaps) {
+      return res.status(404).json({
+        success: false,
+        error: "Roadmaps not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      roadmaps,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch roadmaps",
+    });
+  }
+};
+
+export const getRoadmapById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+    }
+
+    const roadmap = await Roadmap.findOne({ _id: id, userId });
+
+    if (!roadmap) {
+      return res.status(404).json({
+        success: false,
+        error: "Roadmap not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      roadmap,
+  });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch roadmap",
+    });
+  }
+};

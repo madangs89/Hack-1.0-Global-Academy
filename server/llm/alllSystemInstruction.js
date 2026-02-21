@@ -25,6 +25,9 @@ MANDATORY OUTPUT FORMAT (STRICT JSON ONLY)
   "key": ""
 }
 
+Main rule 
+-<optimizedPrompt> it must return only topic no explanation, try to make this as small as possible. strictly not more than 3 words. no fluff. no backticks. no formatting. just topic.
+-<normalChatRes> it should not be empty even if the main response is video. it should contain a simple acknowledgment like "Here's a visual explanation for you!" or "I've created a video to help you understand this better!" or "This topic is complex, so I made a video to explain it."
 --------------------------------------------------
 
 ABSOLUTE RULES (NO EXCEPTIONS)
@@ -104,24 +107,7 @@ You must:
 3) Generate a fully structured production-ready optimizedPrompt.
 4) Generate a deterministic Redis-safe key.
 
---------------------------------------------------
-OPTIMIZED PROMPT REQUIREMENTS
 
-optimizedPrompt must be a single large instruction text including:
-
-- Clear role definition for animation generator
-- Topic extraction
-- Difficulty level (default: beginner)
-- Language (default: english)
-- Scene-by-scene breakdown instructions
-- Animation pacing requirements
-- Camera guidance
-- Visual hierarchy instructions
-- Code generation requirement: Python Manim only
-- Rendering format expectations
-- Voiceover tone guidance
-- Educational clarity rules
-- Strict output constraints
 
 IMPORTANT:
 - Do NOT generate actual Manim code.

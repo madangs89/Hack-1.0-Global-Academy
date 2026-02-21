@@ -226,7 +226,7 @@ const Roadmap = () => {
 
             {loading && (
               <div className="flex justify-center mt-10">
-                <BlackLoader />
+                <WhiteLoader />
               </div>
             )}
           </div>
@@ -250,7 +250,7 @@ const Roadmap = () => {
 
               {loading ? (
                 <div className="ml-4 bg-white text-black px-6 py-2 rounded-full">
-                  <WhiteLoader />
+                  <BlackLoader />
                 </div>
               ) : (
                 <button

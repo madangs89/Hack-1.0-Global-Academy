@@ -124,6 +124,10 @@ export const acceptChat = async (req, res) => {
         console.log("Cache hit for key:", key);
         videoUrl = await pubClient.hget("videoKeyToUrl", key);
         console.log("Video URL from cache:", videoUrl);
+        io.to(userId.toString()).emit("url", {
+          chatId,
+          videoUrl,
+        });
         chatDoc.messages[chatDoc.messages.length - 1].videoUrl = videoUrl;
         await chatDoc.save();
       } else {
@@ -142,6 +146,10 @@ export const acceptChat = async (req, res) => {
         console.log(vedioRes);
         const uploadRes = await uploadVideoBuffer(vedioRes.data);
         videoUrl = uploadRes.secure_url;
+        io.to(userId.toString()).emit("url", {
+          chatId,
+          videoUrl,
+        });
 
         console.log("Video uploaded to Cloudinary:", videoUrl);
         await pubClient.hset("videoKeyToUrl", key, videoUrl);

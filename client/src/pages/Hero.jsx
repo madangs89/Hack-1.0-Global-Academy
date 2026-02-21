@@ -187,8 +187,27 @@ const Hero = () => {
 
     socket.on("llmUpdates", handleUpdate);
 
+    socket.on("url", (data) => {
+      const { videoUrl, chatId } = data;
+      setChats((prev) => {
+        const oldData = [...prev];
+        oldData[oldData.length - 1].videoUrl = videoUrl;
+        oldData[oldData.length - 1].isVideoCall = false;
+
+        return [...oldData];
+      });
+    });
+
     return () => {
       socket.off("llmUpdates", handleUpdate);
+      socket.off("url", (data) => {
+        const { videoUrl, chatId } = data;
+        setChats((prev) => {
+          const oldData = [...prev];
+          oldData[oldData.length - 1].videoUrl = videoUrl;
+          return [...oldData];
+        });
+      });
     };
   }, [socket]);
 

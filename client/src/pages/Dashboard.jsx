@@ -16,11 +16,27 @@ const Dashboard = () => {
   const navRef = useRef(null);
   const heroRef = useRef(null);
   const btnRef = useRef(null);
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
 
   const dispatch = useDispatch();
   const socketSlice = useSelector((state) => state.socket);
   const authSlice = useSelector((state) => state.auth);
   useEffect(() => {
+    gsap.to(leftRef.current, {
+      x: -window.innerWidth,
+      duration: 1,
+      opacity: 0,
+      ease:"power3.out"
+    });
+    gsap.to(rightRef.current, {
+      x: window.innerWidth,
+      duration: 1,
+      opacity: 0,
+      ease:"power3.out"
+
+    });
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     tl.from(bgRef.current, {
@@ -28,6 +44,7 @@ const Dashboard = () => {
       opacity: 0,
       duration: 1.2,
     })
+
       .from(
         navRef.current,
         {
@@ -81,6 +98,15 @@ const Dashboard = () => {
         className="absolute inset-0 w-full h-full object-cover"
         alt=""
       />
+
+      <div
+        ref={leftRef}
+        className="absolute z-[9999999] w-1/2 bg-[#292828] left-0 h-full"
+      ></div>
+      <div
+        ref={rightRef}
+        className="absolute z-[9999999] w-1/2 bg-[#292828]  right-0 h-full"
+      ></div>
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>

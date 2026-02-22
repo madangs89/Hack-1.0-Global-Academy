@@ -253,6 +253,8 @@ const Hero = () => {
     <div className="relative min-h-screen flex flex-col overflow-hidden  font-['Manrope']">
       <Cursor />
 
+
+      
       {/* Background Image (CLEAR at start) */}
       <img
         ref={imageRef}

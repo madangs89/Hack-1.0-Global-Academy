@@ -15,6 +15,7 @@ import { setCurrentWorkingId, setUser } from "../redux/Slice/authSlice";
 import { io } from "socket.io-client";
 import { setSocket } from "../redux/Slice/socketSlice";
 import SkeletonLoader from "../componenets/SkeletonLoader";
+import AIOrb from "../componenets/AIOrb";
 
 const Hero = () => {
   const imageRef = useRef(null);
@@ -413,6 +414,8 @@ const Hero = () => {
       ) : (
         <div className="flex flex-col items-center justify-center text-center px-6 flex-1 relative z-[10]">
           {/* Heading */}
+
+          <AIOrb />
           <h1
             ref={headingRef}
             className="text-4xl md:text-6xl font-semibold text-white leading-tight max-w-4xl"

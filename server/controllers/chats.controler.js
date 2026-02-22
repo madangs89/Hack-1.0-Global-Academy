@@ -129,16 +129,95 @@ export const acceptChat = async (req, res) => {
     let videoUrl = null;
 
     if (isVideoCall) {
+      if (
+        key.includes("atom") ||
+        key.includes("molecule") ||
+        key.includes("electron")
+      ) {
+        videoUrl =
+          "https://player.cloudinary.com/embed/?cloud_name=dyl1hpkdx&public_id=AtomStructure_a6yzbj";
+      } else if (
+        key.includes("binary") ||
+        key.includes("binary search") ||
+        key.includes("binarysearch")
+      ) {
+        videoUrl =
+          "https://res.cloudinary.com/dyl1hpkdx/video/upload/v1771731046/BinarySearchVisualization_g8rpox.mp4";
+      } else if (
+        key.includes("bubble") ||
+        key.includes("bubble sort") ||
+        key.includes("bubblesort")
+      ) {
+        videoUrl =
+          "https://res.cloudinary.com/dyl1hpkdx/video/upload/v1771731177/BubbleSortAnimation_dq9b03.mp4";
+      } else if (
+        key.includes("parabola") ||
+        key.includes("parabola equation") ||
+        key.includes("parabola graph")
+      ) {
+        videoUrl =
+          "https://res.cloudinary.com/dyl1hpkdx/video/upload/v1771731434/ParabolaExplanation_ygid0l.mp4";
+      } else if (
+        key.includes("solar") ||
+        key.includes("solar system") ||
+        key.includes("solar system explanation") ||
+        key.includes("solarsystem") ||
+        key.includes("planets")
+      ) {
+        videoUrl =
+          "https://res.cloudinary.com/dyl1hpkdx/video/upload/v1771731544/SolarSystemVisualization_gy2kdm.mp4";
+      } else if (
+        key.includes("merge") ||
+        key.includes("merge sort") ||
+        key.includes("mergesort")
+      ) {
+        videoUrl =
+          "https://res.cloudinary.com/dyl1hpkdx/video/upload/v1771731738/MergeSortVisualization_thhsei.mp4";
+      } else {
+        videoUrl = "";
+      }
+
+      if (videoUrl) {
+        const socketId = await pubClient.hget("socketIdToUserId", userId);
+        console.log("Emitting to socket ID:", socketId);
+
+        if (socketId) {
+          io.to(socketId).emit("url", {
+            chatId,
+            videoUrl,
+          });
+        } else {
+          io.to(userId.toString()).emit("url", {
+            chatId,
+            videoUrl,
+          });
+        }
+        chatDoc.messages[chatDoc.messages.length - 1].videoUrl = videoUrl;
+        await chatDoc.save();
+
+        return;
+      }
+
       const isCachedDataAwailable = await pubClient.get(key);
 
       if (isCachedDataAwailable) {
         console.log("Cache hit for key:", key);
         videoUrl = await pubClient.hget("videoKeyToUrl", key);
         console.log("Video URL from cache:", videoUrl);
-        io.to(userId.toString()).emit("url", {
-          chatId,
-          videoUrl,
-        });
+        const socketId = await pubClient.hget("socketIdToUserId", userId);
+        console.log("Emitting to socket ID:", socketId);
+
+        if (socketId) {
+          io.to(socketId).emit("url", {
+            chatId,
+            videoUrl,
+          });
+        } else {
+          io.to(userId.toString()).emit("url", {
+            chatId,
+            videoUrl,
+          });
+        }
         chatDoc.messages[chatDoc.messages.length - 1].videoUrl = videoUrl;
         await chatDoc.save();
       } else {

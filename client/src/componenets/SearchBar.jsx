@@ -44,6 +44,8 @@ function SearchBar({
           withCredentials: true,
         },
       );
+
+      dispatch(setCurrentWorkingId(aiRes.data.chatId));
     } catch (error) {
       console.log(error);
       setChats((prev) =>

@@ -106,11 +106,11 @@ io.on("connection", (socket) => {
     console.log("User joined room:", userId);
   }
 
-  // socket.on("disconnect", async () => {
-  //   if (userId) {
-  //     await pubClient.hdel("socketIdToUserId", userId);
-  //   }
-  // });
+  socket.on("disconnect", async () => {
+    if (userId) {
+      await pubClient.hdel("socketIdToUserId", userId);
+    }
+  });
 });
 
 server.listen(port, async () => {

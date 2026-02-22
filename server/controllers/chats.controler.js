@@ -105,13 +105,21 @@ export const acceptChat = async (req, res) => {
     const socketId = await pubClient.hget("socketIdToUserId", userId);
     console.log("Emitting to socket ID:", socketId);
 
-    io.to(socketId).emit("llmUpdates", {
-      chatId,
-      message: normalChatRes,
-      isVideoCall,
-      videoUrl: null,
-    });
-
+    if (socketId) {
+      io.to(socketId).emit("llmUpdates", {
+        chatId,
+        message: normalChatRes,
+        isVideoCall,
+        videoUrl: null,
+      });
+    } else {
+      io.to(userId.toString()).emit("llmUpdates", {
+        chatId,
+        message: normalChatRes,
+        isVideoCall,
+        videoUrl: null,
+      });
+    }
     chatDoc.messages.push({
       from: "system",
       message: normalChatRes,
@@ -149,10 +157,22 @@ export const acceptChat = async (req, res) => {
         console.log(vedioRes);
         const uploadRes = await uploadVideoBuffer(vedioRes.data);
         videoUrl = uploadRes.secure_url;
-        io.to(userId.toString()).emit("url", {
-          chatId,
-          videoUrl,
-        });
+        io.to(userId.toString());
+
+        const socketId = await pubClient.hget("socketIdToUserId", userId);
+        console.log("Emitting to socket ID:", socketId);
+
+        if (socketId) {
+          io.to(socketId).emit("url", {
+            chatId,
+            videoUrl,
+          });
+        } else {
+          io.to(userId.toString()).emit("url", {
+            chatId,
+            videoUrl,
+          });
+        }
 
         console.log("Video uploaded to Cloudinary:", videoUrl);
         await pubClient.hset("videoKeyToUrl", key, videoUrl);

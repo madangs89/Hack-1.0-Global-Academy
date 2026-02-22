@@ -14,6 +14,7 @@ import WhiteLoader from "../componenets/WhiteLoader";
 import { setCurrentWorkingId, setUser } from "../redux/Slice/authSlice";
 import { io } from "socket.io-client";
 import { setSocket } from "../redux/Slice/socketSlice";
+import SkeletonLoader from "../componenets/SkeletonLoader";
 
 const Hero = () => {
   const imageRef = useRef(null);
@@ -390,18 +391,7 @@ const Hero = () => {
                     )}
                     {isVedioCallTrue &&
                       !chat.videoUrl &&
-                      chat.from != "user" && (
-                        <div className="flex justify-center items-center w-56 mx-auto bg-white h-80 rounded-md mt-4 overflow-hidden">
-                          <div className="w-full h-full p-4 animate-pulse space-y-4">
-                            <div className="w-full h-40 bg-gray-200 rounded-md"></div>
-
-                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-
-                            <div className="h-10 bg-gray-200 rounded-md mt-6"></div>
-                          </div>
-                        </div>
-                      )}
+                      chat.from != "user" && <SkeletonLoader />}
                   </div>
                 </div>
               );
